@@ -1,6 +1,8 @@
 import React, { Component } from 'react'
 import './App.css'
 import axios from 'axios'
+// components
+import Weather from './Weather'
 
 // API should be stored as process.env.REACT_API_KEY not hard coded
 const API_KEY = 'appid=b7c39bcd112707191d11bd37e5c84658'
@@ -24,15 +26,37 @@ class App extends Component {
 
   onSubmit(event) {
     event.preventDefault()
-    const zipSearch = `${OPEN_WEATHER}${this.state.zip}&${API_KEY}`
+    // I used the api to return fahrenheit
+    // If api did not have the option I could have converted kelvin to fahrenheit
+    // using ( kelvin value - 273.15 ) * 1.8 ) + 32 (I think)
+    const zipSearch = `${OPEN_WEATHER}${this.state.zip}&units=imperial&${API_KEY}`
     axios.get(zipSearch)
       .then(({ data }) => {
         this.setState({ error: null, data })
       })
       .catch(({ response }) => {
-        this.setState({ error: response.data.message })
+        this.setState({ 
+          error: response.data.message,
+          data: null 
+        })
       })
       this.setState({ zip: "" })
+  }
+
+  renderError() {
+    return (
+      this.state.error ?
+      <p className="error">{ this.state.error }</p> :
+      null
+    )
+  }
+
+  renderTable() {
+    return (
+      this.state.data ?
+      <Weather data={this.state.data}/> :
+      null
+    )
   }
 
   render() {
@@ -40,7 +64,7 @@ class App extends Component {
     return (
       <div className="App">
         <header className="App-header">
-          <h1 className="App-title">Welcome App</h1>
+          <h1 className="App-title">Weather App</h1>
         </header>
         <p className="App-intro">
           Find out local weather by zip code.
@@ -59,11 +83,8 @@ class App extends Component {
           />
           <button type="submit">Search</button>
         </form>
-        { 
-          this.state.error ?
-          <p className="error">{ this.state.error }</p> :
-          null
-        }
+        { this.renderError() }
+        { this.renderTable() }
       </div>
     )
   }
